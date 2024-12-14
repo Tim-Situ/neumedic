@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:neumedic/chatbot_page.dart';
+import 'package:neumedic/home_page.dart';
+import 'package:neumedic/signin_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: false,
       ),
-      home: const MyHomePage(),
+      home: const SigninPage(),
     );
   }
 }
@@ -27,212 +30,122 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = <Widget>[
+    const HomePage(),
+  ];
+
+  final List<IconData> _icons = [
+    Icons.home_outlined,
+    Icons.insert_chart_outlined_rounded,
+    Icons.logout,
+  ];
+
+  void _onItemTapped(int index) {
+
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ChatbotPage()), 
+      );
+    }else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => SigninPage()),
+      );
+    }else{
+      setState(() {
+        _selectedIndex = index;
+      });
+    } 
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Column(
+        backgroundColor: Colors.white,
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x20208FF6),
+                offset: Offset(0, -2),
+                blurRadius: 50,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(
+              _icons.length,
+              (index) => GestureDetector(
+                onTap: (() => _onItemTapped(index)),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  transform: index == 1
+                      ? Matrix4.translationValues(0, -33, 0) // Menu tengah lebih tinggi
+                      : Matrix4.identity(),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24,
-                                  backgroundImage: NetworkImage(
-                                      'https://via.placeholder.com/150'),
-                                ),
-                                SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Good morning,',
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                    Text(
-                                      'Muhammad Haulul',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
+                      if (index == 1)
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withOpacity(0.3),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: Image.asset(
+                            'assets/icons/icon-neumedic.png',
+                            width: 60,
+                            height: 60,
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Icon(
+                            _icons[index],
+                            size: 30,
+                            color: index == _selectedIndex
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
+                        ),
+                      if (index == _selectedIndex && index != 1)
+                        Positioned(
+                          bottom: 10,
+                          child: Container(
+                            width: 7,
+                            height: 7,
+                            decoration: const BoxDecoration(
+                              color: Colors.blue,
+                              shape: BoxShape.circle,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              print("Tes");
-                            },
-                            icon: Icon(Icons.notifications_outlined),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 52),
-                      Text(
-                        'How are you today?',
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildMoodIcon(Colors.red),
-                          _buildMoodIcon(Colors.orange),
-                          _buildMoodIcon(Colors.yellow),
-                          _buildMoodIcon(Colors.green),
-                          _buildMoodIcon(Colors.greenAccent),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text('Take Assessment'),
                         ),
-                      ),
-                      SizedBox(height: 32),
                     ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 5,
-                        blurRadius: 7,
-                        offset: Offset(0, -3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Mood Stats', style: TextStyle(fontSize: 18)),
-                      SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildDayBox('S', '14'),
-                          _buildDayBox('M', '18'),
-                          _buildDayBox('T', '15', isSelected: true),
-                          _buildDayBox('W', '17'),
-                          _buildDayBox('T', '19'),
-                          _buildDayBox('F', '20'),
-                          _buildDayBox('S', '20'),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                      Text('Weekly Report', style: TextStyle(fontSize: 18)),
-                      SizedBox(height: 10),
-                      Container(
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            Text('No Available Report'),
-                            SizedBox(height: 10),
-                            Text('Take an assessment with EEG module to get'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home, color: Colors.blue),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart, color: Colors.black),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today, color: Colors.black),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings, color: Colors.black),
-              label: '',
-            ),
-          ],
-          currentIndex: 0, // Indeks item yang aktif
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.black,
-          showUnselectedLabels: false,
-          showSelectedLabels: false,
-          onTap: (index) {
-            // Tambahkan logika untuk navigasi jika diperlukan
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMoodIcon(Color color) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5),
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildDayBox(String day, String date, {bool isSelected = false}) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.blue : Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: Colors.black12,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Text(day),
-          Text(
-            date,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }
