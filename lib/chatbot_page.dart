@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
+import 'dart:developer' as dev;
+
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -12,17 +16,64 @@ class _ChatbotPageState extends State<ChatbotPage> {
   List<Map<String, String>> _messages = [
     {"sender": "bot", "text": "Hello ujen, how are you?"},
   ];
+  final FlutterTts _flutterTts = FlutterTts();
+  late String language = 'en-US';
+  final Gemini gemini = Gemini.instance;
+  final List<String> responses = [];
 
-  ScrollController _scrollController = ScrollController();  // Tambahkan ScrollController
+  ScrollController _scrollController =
+      ScrollController(); // Tambahkan ScrollController
 
   void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
+    try {
       setState(() {
         _messages.add({"sender": "user", "text": _controller.text});
-        _messages.add({"sender": "bot", "text": "You said: ${_controller.text}"});
       });
+      String question = _controller.text;
+      gemini.streamGenerateContent(question).listen((event) {
+        Map<String, String> lastMessage = _messages.last;
+        if (lastMessage != null && lastMessage["sender"] == "bot") {
+          lastMessage = _messages.removeLast();
+          String? response = event?.output;
+          responses.add(response!);
+          String _geminiresponse = responses.join(" ");
+          setState(() {
+            _messages.add({"sender": "bot", "text": _geminiresponse});
+          });
+          dev.log("response $response");
+          _speak(responses.join(" "));
+        } else {
+          String? response = event?.output;
+          setState(() {
+            responses.add(response!);
+            _messages.add({"sender": "bot", "text": response});
+          });
+          dev.log("else on response: $response");
+        }
+      });
+      dev.log(responses.toString());
+    } catch (e) {
+      dev.log("error: $e");
+    } finally {
+      setState(() {
+        responses.clear();
+      });
+      dev.log("after clearing: ${responses.toString()}");
       _controller.clear();
       _scrollToBottom();
+    }
+  }
+
+  Future<void> _speak(String text) async {
+    try {
+      print("TTS sedang berbicara: $text"); // Debugging
+      await _flutterTts.setLanguage(language); // Ubah ke "en-US" jika perlu
+      await _flutterTts.setSpeechRate(0.5); // Kecepatan bicara
+      await _flutterTts.setVolume(1.0); // Volume maksimum
+      await _flutterTts.setPitch(1.0); // Pitch suara
+      await _flutterTts.speak(text); // Mulai berbicara
+    } catch (e) {
+      print("TTS Error: $e");
     }
   }
 
@@ -46,12 +97,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
         margin: EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: message["sender"] == "bot" ? Colors.white : Color(0xFFE7F9FF),
-          borderRadius: const BorderRadius.all(Radius.circular(27)),
-          border: Border.all(
-            color: Color(0xFFE8E8E8)
-          )
-        ),
+            color:
+                message["sender"] == "bot" ? Colors.white : Color(0xFFE7F9FF),
+            borderRadius: const BorderRadius.all(Radius.circular(27)),
+            border: Border.all(color: Color(0xFFE8E8E8))),
         child: Text(
           message["text"]!,
           style: TextStyle(fontSize: 16),
@@ -83,6 +132,24 @@ class _ChatbotPageState extends State<ChatbotPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  if (language == 'en-US') {
+                    language = 'id-ID';
+                  } else {
+                    language = 'en-US';
+                  }
+                });
+              },
+              icon: Icon(
+                language == 'en-US'
+                    ? Icons.swap_horizontal_circle
+                    : Icons.swap_horizontal_circle_outlined,
+                color: Colors.orange,
+              ))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
@@ -90,14 +157,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
           children: [
             Expanded(
               child: ListView.builder(
-                controller: _scrollController,  // Set controller ke ListView
+                controller: _scrollController, // Set controller ke ListView
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   return _buildMessageItem(_messages[index]);
                 },
               ),
             ),
-            
             Row(
               children: [
                 Container(
@@ -120,7 +186,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     size: 30, // Ukuran ikon
                   ),
                 ),
-                SizedBox(width: 13,),
+                SizedBox(
+                  width: 13,
+                ),
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -132,7 +200,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     ),
                   ),
                 ),
-                SizedBox(width: 13,),
+                SizedBox(
+                  width: 13,
+                ),
                 GestureDetector(
                   onTap: _sendMessage,
                   child: Container(
@@ -161,5 +231,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _flutterTts.stop();
+    _controller.dispose();
+    super.dispose();
   }
 }
