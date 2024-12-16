@@ -14,7 +14,7 @@ class ChatbotPage extends StatefulWidget {
 class _ChatbotPageState extends State<ChatbotPage> {
   TextEditingController _controller = TextEditingController();
   List<Map<String, String>> _messages = [
-    {"sender": "bot", "text": "Hello ujen, how are you?"},
+    {"sender": "bot", "text": "Hello situ, how are you?"},
   ];
   final FlutterTts _flutterTts = FlutterTts();
   late String language = 'en-US';
@@ -167,25 +167,44 @@ class _ChatbotPageState extends State<ChatbotPage> {
             Row(
               children: [
                 Container(
-                  width: 47,
-                  height: 47,
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
-                        blurRadius: 10,
-                        spreadRadius: 2,
+                    width: 47,
+                    height: 47,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.3),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        dev.log("STT doesn't available for now");
+                        showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                            title:
+                                const Text('Speech is not Available for now'),
+                            content: const Text(
+                                'Sorry speech service is still on maintenance'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, 'OK'),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        Icons.keyboard_voice_sharp, // Ikon yang diinginkan
+                        color: Colors.white,
+                        size: 30, // Ukuran ikon
                       ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.keyboard_voice_sharp, // Ikon yang diinginkan
-                    color: Colors.white,
-                    size: 30, // Ukuran ikon
-                  ),
-                ),
+                    )),
                 SizedBox(
                   width: 13,
                 ),

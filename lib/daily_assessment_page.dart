@@ -170,12 +170,35 @@ class _DailyAssessmentPageState extends State<DailyAssessmentPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.keyboard_voice),
                           SizedBox(width: 10),
-                          Text('Use voice instead'),
+                          TextButton(
+                            onPressed: () {
+                              showDialog<String>(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  title: const Text(
+                                      'Speech is not Available for now'),
+                                  content: const Text(
+                                      'Sorry speech service is still on maintenance'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, 'OK'),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Use voice instead',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
                         ],
                       ),
                     ),
