@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:neumedic/chatbot_page.dart';
+import 'package:neumedic/consts.dart';
 import 'package:neumedic/home_page.dart';
 import 'package:neumedic/signin_page.dart';
 
 void main() {
+  Gemini.init(apiKey: GEMINI_API_KEY);
   runApp(const MyApp());
 }
 
@@ -43,22 +46,21 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   void _onItemTapped(int index) {
-
     if (index == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ChatbotPage()), 
+        MaterialPageRoute(builder: (context) => const ChatbotPage()),
       );
-    }else if (index == 2) {
+    } else if (index == 2) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SigninPage()),
       );
-    }else{
+    } else {
       setState(() {
         _selectedIndex = index;
       });
-    } 
+    }
   }
 
   @override
@@ -90,7 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
                   transform: index == 1
-                      ? Matrix4.translationValues(0, -33, 0) // Menu tengah lebih tinggi
+                      ? Matrix4.translationValues(
+                          0, -33, 0) // Menu tengah lebih tinggi
                       : Matrix4.identity(),
                   child: Stack(
                     alignment: Alignment.center,
